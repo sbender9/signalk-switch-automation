@@ -91,52 +91,50 @@ module.exports = function(app) {
   }
   
   plugin.schema = function() {
-    var paths = app.streambundle.getAvailablePaths().sort()
-    return {
-      type: 'object',
-      required: ['relay'],
-      properties: {
-        relay: {
-          type: 'number',
-          title: 'Relay #',
-          enum: [ 0, 1 ],
-          default: 0
-        },
-        conditions: {
-          type: "array",
-          title: "Conditions",
-          items: {
-            type: "object",
-            title: "Condition",
-            required: ["operator", "path", "test", "value"],
-            properties: {
-              operator: {
-                type: "string",
-                title: "Operator",
-                enum: ["And", "Or" ],
-                default: "And"
-              },
-              path: {
-                type: "string",
-                title: "Path",
-                enum: paths
-              },
-              test: {
-                type: "string",
-                title: "Test",
-                enum: [ "==", "!=", ">", "<"],
-                default: "=="
-              },
-              value: {
-                type: "string",
-                title: "Value",
-                description: "The value to test against. Use single quotes for strings"
-              }
-            }
+    var paths = JSON.parse(JSON.stringify(app.streambundle.getAvailablePaths())).sort()
+    var conditions = {
+      type: "array",
+      title: "Relay 0 Conditions",
+      items: {
+        type: "object",
+        title: "Condition",
+        required: ["operator", "path", "test", "value"],
+        properties: {
+          operator: {
+            type: "string",
+            title: "Operator",
+            enum: ["And", "Or" ],
+            default: "And"
+          },
+          path: {
+            type: "string",
+            title: "Path",
+            enum: paths
+          },
+          test: {
+            type: "string",
+            title: "Test",
+            enum: [ "==", "!=", ">", "<"],
+            default: "=="
+          },
+          value: {
+            type: "string",
+            title: "Value",
+            description: "The value to test against. Use single quotes for strings"
           }
         }
       }
     }
+    var res = {
+      type: 'object',
+      required: ['relay'],
+      properties: {
+        relay1: conditions,
+        relay2: JSON.parse(JSON.stringify(conditions))
+        }
+      }
+    res.properties.relay2.title = 'Relay 1 Conditions'
+    return res
   }
   
   return plugin;
