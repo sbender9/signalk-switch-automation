@@ -1,6 +1,6 @@
 {
   "name": "signalk-venus-relay",
-  "version": "1.4.12",
+  "version": "0.0.1",
   "description": "Plugin that sets the relay on a Venus GX based on SignalK values",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sbender9/signalk-venus/relay"
+    "url": "https://github.com/sbender9/signalk-venus-relay"
   }
 }
