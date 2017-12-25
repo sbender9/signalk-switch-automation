@@ -16,35 +16,39 @@ module.exports = function(app) {
 
     debug("start");
 
-    var paths = options.conditions.map(c => c.path)
-    debug(`paths: ${JSON.stringify(paths)}`)
-    unsubscribes.push(
-      Bacon.combineWith(
-        evaluator,
-        paths.map(app.streambundle.getSelfStream, app.streambundle)
+    [options.relay1, options.relay2].forEach((conditions,index) => {
+      var paths = (conditions || []).map(c => c.path)
+      debug(`paths: ${index}.${JSON.stringify(paths)}`)
+      unsubscribes.push(
+        Bacon.combineWith(
+          evaluator.bind(this, conditions),
+          paths.map(app.streambundle.getSelfStream, app.streambundle)
+        )
+          .changes()
+          .debounceImmediate(20000)
+          .onValue(state => {
+            if ( !_.isUndefined(state) ) {
+              app.emit('venusSetValue',
+                       {
+                         destination: 'com.victronenergy.system',
+                         path: `/Relay/${index}/State`,
+                         value: state ? 1 : 0
+                       });
+            }
+          })
       )
-        .changes()
-        .debounceImmediate(20000)
-        .onValue(state => {
-          console.log(`state ${state}`)
-          if ( !_.isUndefined(state) ) {
-            app.emit('venusSetValue',
-                     {
-                       destination: 'com.victronenergy.system',
-                       path: `/Relay/${options.relay}/State`,
-                       value: state ? 1 : 0
-                     });
-          }
-        })
-    )
+    })
   }
 
-  function evaluator() {
-    var args = [...arguments];
+  function evaluator(conditions) {
+    var args = [...arguments].slice(1);
+
+    debug(`args: ${JSON.stringify(args)}`)
+    debug(`conditions: ${JSON.stringify(conditions)}`)
 
     var state
     var hadErrors = false
-    options.conditions.forEach((cond, index) => {
+    conditions.forEach((cond, index) => {
       var value =  args[index]
       var testValue;
       var testResult
@@ -94,7 +98,7 @@ module.exports = function(app) {
     var paths = JSON.parse(JSON.stringify(app.streambundle.getAvailablePaths())).sort()
     var conditions = {
       type: "array",
-      title: "Relay 0 Conditions",
+      title: "Relay 1 Conditions",
       items: {
         type: "object",
         title: "Condition",
@@ -127,13 +131,13 @@ module.exports = function(app) {
     }
     var res = {
       type: 'object',
-      required: ['relay'],
+      required: ['relay1', 'realy2'],
       properties: {
         relay1: conditions,
         relay2: JSON.parse(JSON.stringify(conditions))
         }
       }
-    res.properties.relay2.title = 'Relay 1 Conditions'
+    res.properties.relay2.title = 'Relay 2 Conditions'
     return res
   }
   
