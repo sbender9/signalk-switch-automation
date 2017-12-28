@@ -28,12 +28,16 @@ module.exports = function(app) {
           .debounceImmediate(20000)
           .onValue(state => {
             if ( !_.isUndefined(state) ) {
-              app.emit('venusSetValue',
-                       {
-                         destination: 'com.victronenergy.system',
-                         path: `/Relay/${index}/State`,
-                         value: state ? 1 : 0
-                       });
+              var current = _.get(app.signalk.self, `electrical.venus.relay.${index}.value`)
+              if ( !_.isUndefined(current) && current != state ) {
+                debug(`sending new state ${state} for relay ${index}`)
+                app.emit('venusSetValue',
+                         {
+                           destination: 'com.victronenergy.system',
+                           path: `/Relay/${index}/State`,
+                           value: state
+                         });
+              }
             }
           })
       )
@@ -63,7 +67,7 @@ module.exports = function(app) {
           return
         }
       }
-      
+
       var test = cond.test
       if ( test === '==' ) {
         testResult = value == testValue 
@@ -79,7 +83,7 @@ module.exports = function(app) {
 
       state = index == 0 ? testResult : (cond.operator == 'And' ? state && testResult : state || testResult)
     });
-    return !_.isUndefined(state) && !hadErrors ? state : undefined
+    return !_.isUndefined(state) && !hadErrors ? (state ? 1 : 0) : undefined
   }
   
   plugin.stop = function() {
