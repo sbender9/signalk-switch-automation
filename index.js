@@ -1,4 +1,3 @@
-const debug = require("debug")("signalk-venus-relay");
 const _ = require('lodash')
 const Bacon = require('baconjs')
 
@@ -12,13 +11,11 @@ module.exports = function(app) {
   plugin.description = "Plugin that sets the relay on a Venus GX based on SignalK values";
 
   plugin.start = function(theOptions) {
-    options = theOptions
-
-    debug("start");
+    options = theOptions;
 
     [options.relay1, options.relay2].forEach((conditions,index) => {
       var paths = (conditions || []).map(c => c.path)
-      debug(`paths: ${index}.${JSON.stringify(paths)}`)
+      app.debug(`paths: ${index}.${JSON.stringify(paths)}`)
       unsubscribes.push(
         Bacon.combineWith(
           evaluator.bind(this, conditions),
@@ -28,9 +25,9 @@ module.exports = function(app) {
           .debounceImmediate(20000)
           .onValue(state => {
             if ( !_.isUndefined(state) ) {
-              var current = _.get(app.signalk.self, `electrical.venus.relay.${index}.value`)
+              var current = app.getSelfPath(`electrical.venus.relay.${index}.value`)
               if ( !_.isUndefined(current) && current != state ) {
-                debug(`sending new state ${state} for relay ${index}`)
+                app.debug(`sending new state ${state} for relay ${index}`)
                 app.emit('venusSetValue',
                          {
                            destination: 'com.victronenergy.system',
@@ -47,8 +44,8 @@ module.exports = function(app) {
   function evaluator(conditions) {
     var args = [...arguments].slice(1);
 
-    debug(`args: ${JSON.stringify(args)}`)
-    debug(`conditions: ${JSON.stringify(conditions)}`)
+    app.debug(`args: ${JSON.stringify(args)}`)
+    app.debug(`conditions: ${JSON.stringify(conditions)}`)
 
     var state
     var hadErrors = false
@@ -79,7 +76,7 @@ module.exports = function(app) {
         testResult = value > testValue
       }
       
-      debug(`${index != 0 ? cond.operator : ''} ${value} ${cond.test} ${testValue} = ${testResult}`)
+      app.debug(`${index != 0 ? cond.operator : ''} ${value} ${cond.test} ${testValue} = ${testResult}`)
 
       state = index == 0 ? testResult : (cond.operator == 'And' ? state && testResult : state || testResult)
     });
@@ -87,7 +84,7 @@ module.exports = function(app) {
   }
   
   plugin.stop = function() {
-    debug("stopping...")
+    app.debug("stopping...")
     unsubscribes.forEach(f => f());
     unsubscribes = [];
   };
