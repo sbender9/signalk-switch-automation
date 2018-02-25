@@ -29,28 +29,32 @@ module.exports = function(app) {
 
   plugin.start = function(theOptions) {
     options = theOptions;
-
-    [options.relay1, options.relay2].forEach((conditions,index) => {
-      var paths = (conditions || []).map(c => c.path)
-      app.debug(`paths: ${index}.${JSON.stringify(paths)}`)
+    
+    options.relays.forEach((relay) => {
+      var paths = (relay.conditions || []).map(c => c.path)
+      app.debug(`paths: ${relay.relayPath}: ${JSON.stringify(paths)}`)
       unsubscribes.push(
         Bacon.combineWith(
-          evaluator.bind(this, conditions),
+          evaluator.bind(this, relay.conditions),
           paths.map(app.streambundle.getSelfStream, app.streambundle)
         )
           .changes()
           .debounceImmediate(20000)
           .onValue(state => {
             if ( !_.isUndefined(state) ) {
-              var current = app.getSelfPath(`electrical.venus.relay.${index}.value`)
+              var current = app.getSelfPath(`${relay.relayPath}.value`)
               if ( !_.isUndefined(current) && current != state ) {
-                app.debug(`sending new state ${state} for relay ${index}`)
+                app.debug(`sending new state ${state} for relay ${relay.relayPath}`)
+                app.putSelfPath(relay.relayPath, state)
+
+                /*
                 app.emit('venusSetValue',
                          {
                            destination: 'com.victronenergy.system',
                            path: `/Relay/${index}/State`,
                            value: state
                          });
+                */
               }
             }
           })
@@ -114,48 +118,58 @@ module.exports = function(app) {
   
   plugin.schema = function() {
     var paths = JSON.parse(JSON.stringify(app.streambundle.getAvailablePaths())).sort()
-    var conditions = {
-      type: "array",
-      title: "Relay 1 Conditions",
-      items: {
-        type: "object",
-        title: "Condition",
-        required: ["operator", "path", "test", "value"],
-        properties: {
-          operator: {
-            type: "string",
-            title: "Operator",
-            enum: ["And", "Or" ],
-            default: "And"
-          },
-          path: {
-            type: "string",
-            title: "Path",
-            enum: paths
-          },
-          test: {
-            type: "string",
-            title: "Test",
-            enum: [ "==", "!=", ">", "<"],
-            default: "=="
-          },
-          value: {
-            type: "string",
-            title: "Value",
-            description: "The value to test against. Use single quotes for strings"
+    var res = {
+      type: 'object',
+      properties: {
+        relays: {
+          type: 'array',
+          title: 'Relays',
+          items: {
+            type: 'object',
+            properties: {
+              relayPath: {
+                type: 'string',
+                title: 'Relay Path',
+                enum: paths
+              },
+              conditions: {
+                type: "array",
+                title: "Conditions",
+                items: {
+                  type: "object",
+                  title: "Condition",
+                  required: ["operator", "path", "test", "value"],
+                  properties: {
+                    operator: {
+                      type: "string",
+                      title: "Operator",
+                      enum: ["And", "Or" ],
+                      default: "And"
+                    },
+                    path: {
+                      type: "string",
+                      title: "Path",
+                      enum: paths
+                    },
+                    test: {
+                      type: "string",
+                      title: "Test",
+                      enum: [ "==", "!=", ">", "<"],
+                      default: "=="
+                    },
+                    value: {
+                      type: "string",
+                      title: "Value",
+                      description: "The value to test against. Use single quotes for strings"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
-    var res = {
-      type: 'object',
-      required: ['relay1', 'realy2'],
-      properties: {
-        relay1: conditions,
-        relay2: JSON.parse(JSON.stringify(conditions))
-        }
-      }
-    res.properties.relay2.title = 'Relay 2 Conditions'
     return res
   }
   
