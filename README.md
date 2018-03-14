@@ -20,7 +20,7 @@ Adding switch automation
 Examples
 ========
 
-Turn your anchor light on and off:
+Turn your anchor light on and off automatically:
   * `electrical.inverters.261.acin.voltage` 'is equal' to 0
   * And `environment.sun` 'not equal' to 'day'
   * And `navigation.speedOverGround` 'less than' 0.5
