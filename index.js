@@ -155,6 +155,7 @@ module.exports = function(app) {
                       type: "string",
                       title: "Test",
                       enum: [ "==", "!=", ">", "<"],
+                      enumNames: [ "equal to", "not equal to", "less than", "greater than"],
                       default: "=="
                     },
                     value: {
