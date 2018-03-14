@@ -1,5 +1,5 @@
 {
-  "name": "signalk-swith-automation",
+  "name": "signalk-switch-automation",
   "version": "0.0.1",
   "description": "Plugin that turns a switch on or off based on SignalK values",
   "main": "index.js",
