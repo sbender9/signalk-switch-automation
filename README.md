@@ -21,10 +21,10 @@ Examples
 ========
 
 Turn your anchor light on and off:
-  `electrical.inverters.261.acin.voltage` 'is equal' to 0
-  And `environment.sun` 'not equal' to 'day'
-  And `navigation.speedOverGround` 'less than' 0.5
+  * `electrical.inverters.261.acin.voltage` 'is equal' to 0
+  * And `environment.sun` 'not equal' to 'day'
+  * And `navigation.speedOverGround` 'less than' 0.5
   
 On enable your ACR (Automatic Charge Relay) on when the engine is running and the AC charger is not on
-  `propulsion.port.revolutions` 'greater than 0
-   And `electrical.chargers.261.chargingMode` 'equal to' 'off'
+  * `propulsion.port.revolutions` 'greater than 0
+  * And `electrical.chargers.261.chargingMode` 'equal to' 'off'
