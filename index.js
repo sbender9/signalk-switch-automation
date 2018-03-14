@@ -23,9 +23,9 @@ module.exports = function(app) {
   var unsubscribes = []
   var options
 
-  plugin.id = "signalk-venus-relay";
-  plugin.name = "Venus Relay";
-  plugin.description = "Plugin that sets the relay on a Venus GX based on SignalK values";
+  plugin.id = "signalk-switch-automation";
+  plugin.name = "Switch Automation";
+  plugin.description = "Plugin that turns a switch on or off based on SignalK values";
 
   plugin.start = function(theOptions) {
     options = theOptions;
