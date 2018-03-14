@@ -24,6 +24,7 @@ Turn your anchor light on and off automatically:
   * `electrical.inverters.261.acin.voltage` 'is equal' to 0
   * And `environment.sun` 'not equal' to 'day'
   * And `navigation.speedOverGround` 'less than' 0.5
+  * And `propulsion.port.revolutions` 'equal to` 0
   
 Turn on your ACR (Automatic Charge Relay) when the engine is running and the AC charger is not on
   * `propulsion.port.revolutions` 'greater than 0
