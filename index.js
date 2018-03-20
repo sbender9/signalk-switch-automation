@@ -27,7 +27,19 @@ module.exports = function(app) {
   plugin.name = "Switch Automation";
   plugin.description = "Plugin that turns a switch on or off based on SignalK values";
 
+  var statusMessage
+
+  plugin.statusMessage = () => {
+    return statusMessage
+  }
+
   plugin.start = function(theOptions) {
+
+    if ( !app.putSelfPath ) {
+      statusMessage = "Please upgrade your node server, your version does not support put requests"
+      return
+    }
+    
     options = theOptions;
     
     options.relays.forEach((relay) => {
