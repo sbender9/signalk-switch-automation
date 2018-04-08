@@ -43,34 +43,36 @@ module.exports = function(app) {
     options = theOptions;
     
     options.relays.forEach((relay) => {
-      var paths = (relay.conditions || []).map(c => c.path)
-      app.debug(`paths: ${relay.relayPath}: ${JSON.stringify(paths)}`)
-      unsubscribes.push(
-        Bacon.combineWith(
-          evaluator.bind(this, relay.conditions),
-          paths.map(app.streambundle.getSelfStream, app.streambundle)
-        )
-          .changes()
-          .debounceImmediate(20000)
-          .onValue(state => {
-            if ( !_.isUndefined(state) ) {
-              var current = app.getSelfPath(`${relay.relayPath}.value`)
-              if ( !_.isUndefined(current) && current != state ) {
-                app.debug(`sending new state ${state} for relay ${relay.relayPath}`)
-                app.putSelfPath(relay.relayPath, state)
-
-                /*
+      if ( _.isUndefined(relay.enabled) || relay.enabled ) {
+        var paths = (relay.conditions || []).map(c => c.path)
+        app.debug(`paths: ${relay.relayPath}: ${JSON.stringify(paths)}`)
+        unsubscribes.push(
+          Bacon.combineWith(
+            evaluator.bind(this, relay.conditions),
+            paths.map(app.streambundle.getSelfStream, app.streambundle)
+          )
+            .changes()
+            .debounceImmediate(20000)
+            .onValue(state => {
+              if ( !_.isUndefined(state) ) {
+                var current = app.getSelfPath(`${relay.relayPath}.value`)
+                if ( !_.isUndefined(current) && current != state ) {
+                  app.debug(`sending new state ${state} for relay ${relay.relayPath}`)
+                  app.putSelfPath(relay.relayPath, state)
+                  
+                  /*
                 app.emit('venusSetValue',
-                         {
-                           destination: 'com.victronenergy.system',
-                           path: `/Relay/${index}/State`,
-                           value: state
-                         });
-                */
+                {
+                destination: 'com.victronenergy.system',
+                path: `/Relay/${index}/State`,
+                value: state
+                });
+                  */
+                }
               }
-            }
-          })
-      )
+            })
+        )
+      }
     })
   }
 
@@ -139,6 +141,11 @@ module.exports = function(app) {
           items: {
             type: 'object',
             properties: {
+              enabled: {
+                type: 'boolean',
+                title: 'Enabled',
+                default: true
+              },
               relayPath: {
                 type: 'string',
                 title: 'Relay Path',
