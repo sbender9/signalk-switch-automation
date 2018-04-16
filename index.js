@@ -173,7 +173,7 @@ module.exports = function(app) {
                     test: {
                       type: "string",
                       title: "Test",
-                      enum: [ "==", "!=", ">", "<"],
+                      enum: [ "==", "!=", "<", ">"],
                       enumNames: [ "equal to", "not equal to", "less than", "greater than"],
                       default: "=="
                     },
