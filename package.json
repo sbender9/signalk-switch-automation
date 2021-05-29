@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "signalk-node-server-plugin"
+    "signalk-node-server-plugin",
+    "signalk-category-digital-switching",
+    "signalk-category-utility"
   ],
   "author": {
     "name": "Scott Bender",
